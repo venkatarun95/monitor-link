@@ -1,7 +1,9 @@
 #include <iostream>
 #include <pcap.h>
 
-#include <netinet/if_ether.h>
+#include <netinet/ip.h>
+
+#include "ethernet.hpp"
 
 using namespace std;
 
@@ -65,17 +67,33 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header,
     (uint64_t)header->ts.tv_usec;
   cout << "Timestamp " << ts * 1e-6 << " Length " << header->len << " Captured " << header->caplen << endl;
 
+  monitor::Ethernet eth(packet, header->len, header->caplen);
+  if (eth.is_ip()) {
+    cout << "IP" << endl;
+  }
+  else if (eth.is_arp()) {
+    cout << "ARP" << endl;
+  }
+  else if (eth.is_revarp()) {
+    cout << "RevARP" << endl;
+  }
+
+  monitor::IP ip = eth.get_ip();
+  cout << "TCP: " << ip.is_tcp() << endl;
   // Parse ethernet header
-  ether_header *eth = (ether_header*) packet;
-  if (ntohs(eth->ether_type) == ETHERTYPE_IP) {
-    cout << "IP packet" << endl;
-  }
-  else if (ntohs(eth->ether_type) == ETHERTYPE_ARP) {
-    cout << "ARP packet" << endl;
-  }
-  else {
-    cout << "Unrecognized packet type" << endl;
-  }
+  // ether_header *eth = (ether_header*) packet;
+  // if (ntohs(eth->ether_type) == ETHERTYPE_IP) {
+  //   ; // Also handle IPv6
+  // }
+  // else if (ntohs(eth->ether_type) == ETHERTYPE_ARP) {
+  //   return;
+  // }
+  // else {
+  //   return;
+  // }
+
+  // ip *ip_hdr = (ip*) (packet + sizeof(eth));
+  // cout << ip_hdr->ip_hl << " " << ip_hdr->ip_len << endl;
 
   args = nullptr;
 }
