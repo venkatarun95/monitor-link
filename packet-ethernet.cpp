@@ -1,4 +1,4 @@
-#include "ethernet.hpp"
+#include "packet-ethernet.hpp"
 
 #include <cassert>
 #include <cstring>
@@ -7,7 +7,8 @@
 
 namespace monitor {
 
-Ethernet::Ethernet(const u_char* packet, size_t pkt_len, size_t cap_len)
+PacketEthernet::PacketEthernet(const u_char* packet, size_t pkt_len,
+                               size_t cap_len)
   : packet(packet),
     pkt_len(pkt_len),
     cap_len(cap_len)
@@ -20,20 +21,21 @@ Ethernet::Ethernet(const u_char* packet, size_t pkt_len, size_t cap_len)
   type = eth->ether_type;
 }
 
-IP Ethernet::get_ip() const {
+PacketIP PacketEthernet::get_ip() const {
+  assert(is_ip());
   size_t len = sizeof(ether_header);
-  return IP(packet+len, pkt_len-len, cap_len-len);
+  return PacketIP(packet+len, pkt_len-len, cap_len-len);
 }
 
-bool Ethernet::is_ip() const {
+bool PacketEthernet::is_ip() const {
   return ntohs(type) == ETHERTYPE_IP;
 }
 
-bool Ethernet::is_arp() const {
+bool PacketEthernet::is_arp() const {
   return ntohs(type) == ETHERTYPE_ARP;
 }
 
-bool Ethernet::is_revarp() const {
+bool PacketEthernet::is_revarp() const {
   return ntohs(type) == ETHERTYPE_REVARP;
 }
 

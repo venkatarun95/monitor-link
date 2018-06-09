@@ -3,6 +3,8 @@
 
 #include <netinet/in.h>
 
+#include "packet-tcp.hpp"
+
 namespace monitor {
 
 struct IPAddr {
@@ -28,12 +30,13 @@ struct IPAddr {
 
 class PacketIP {
 public:
-  PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len);  
+  PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len);
 
   bool is_tcp() const {return proto == TCP;}
   bool is_udp() const {return proto == UDP;}
   IPAddr src_addr() const {return src;}
   IPAddr dst_addr() const {return dst;}
+  PacketTCP get_tcp() const;
 
 private:
   const u_char* packet;
@@ -41,6 +44,7 @@ private:
   enum IP_VERSION {IPv4, IPv6} version;
   enum PROTO {TCP, UDP, Unknown} proto;
   IPAddr src, dst;
+  size_t hdr_len;
 };
 
 } // namespace monitor

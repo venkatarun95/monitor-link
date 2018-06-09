@@ -4,19 +4,19 @@
 #include <cstdint>
 #include <net/ethernet.h>
 
-#include "ip.hpp"
+#include "packet-ip.hpp"
 
 namespace monitor {
 
-class Ethernet {
+class PacketEthernet {
 public:
-  Ethernet(const u_char* packet, size_t pkt_len, size_t cap_len);
+  PacketEthernet(const u_char* packet, size_t pkt_len, size_t cap_len);
 
   bool is_ip() const;
   bool is_arp() const;
   bool is_revarp() const;
 
-  IP get_ip() const;
+  PacketIP get_ip() const;
 private:
   const u_char* packet;
   size_t pkt_len, cap_len;

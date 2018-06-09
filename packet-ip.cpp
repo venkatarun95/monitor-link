@@ -1,4 +1,4 @@
-#include "ip.hpp"
+#include "packet-ip.hpp"
 
 #include <cassert>
 #include <iostream>
@@ -7,7 +7,11 @@
 
 namespace monitor {
 
-IP::IP(const u_char* packet, size_t pkt_len, size_t cap_len) {
+PacketIP::PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len)
+  : packet(packet),
+    pkt_len(pkt_len),
+    cap_len(cap_len)
+{
 #ifdef _IP_VHL
   // Version and leader length fields combined. Not yet supported.
   assert(false);
@@ -31,7 +35,7 @@ IP::IP(const u_char* packet, size_t pkt_len, size_t cap_len) {
   }
 
   // Check that our capture length is bigger than address
-  size_t hdr_len = ip_hdr->ip_hl;
+  hdr_len = ip_hdr->ip_hl * 4;
   assert(cap_len > hdr_len);
 
   // Get src and dst address
@@ -44,6 +48,11 @@ IP::IP(const u_char* packet, size_t pkt_len, size_t cap_len) {
   case 0x11: proto = UDP; break;
   default: proto = Unknown; break;
   }
+}
+
+PacketTCP PacketIP::get_tcp() const {
+  assert(is_tcp());
+  return PacketTCP(packet + hdr_len, pkt_len - hdr_len, cap_len - hdr_len);
 }
 
 } // namespace monitor

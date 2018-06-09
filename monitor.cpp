@@ -3,7 +3,9 @@
 
 #include <netinet/ip.h>
 
-#include "ethernet.hpp"
+#include "packet-ethernet.hpp"
+#include "packet-ip.hpp"
+#include "packet-tcp.hpp"
 
 using namespace std;
 
@@ -67,7 +69,7 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header,
     (uint64_t)header->ts.tv_usec;
   cout << "Timestamp " << ts * 1e-6 << " Length " << header->len << " Captured " << header->caplen << endl;
 
-  monitor::Ethernet eth(packet, header->len, header->caplen);
+  monitor::PacketEthernet eth(packet, header->len, header->caplen);
   if (eth.is_ip()) {
     cout << "IP" << endl;
   }
@@ -78,7 +80,7 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header,
     cout << "RevARP" << endl;
   }
 
-  monitor::IP ip = eth.get_ip();
+  monitor::PacketIP ip = eth.get_ip();
   cout << "TCP: " << ip.is_tcp() << endl;
   // Parse ethernet header
   // ether_header *eth = (ether_header*) packet;
