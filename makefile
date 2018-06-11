@@ -6,14 +6,19 @@ INCLUDES :=	-I/opt/local/include/ -I radiotap-library
 
 LIBS     := -lpcap
 #$(MEMORY_STYLE)/libremyprotos.a
-OBJECTS  := packet-ethernet.o packet-ip.o packet-tcp.o
+OBJECTS  := packet-ethernet.o packet-ip.o packet-tcp.o sequence.o
 
 all: monitor
 
 .PHONY: all
 
+test: test-sequence
+
 monitor: monitor.o $(OBJECTS)
 	$(CXX) $(inputs) -o $(output) $(LIBS)
+
+test-sequence: test-sequence.o sequence.o
+  $(CXX) $(inputs) -o $(output) $(LIBS)
 
 %.o: %.cpp
 	$(CXX) $(INCLUDES) $(CXXFLAGS) -c $(input) -o $(output)
