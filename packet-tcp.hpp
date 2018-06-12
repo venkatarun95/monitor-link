@@ -22,6 +22,11 @@ public:
   bool is_eve() const {return fl_ece;}
   bool is_cwr() const {return fl_cwr;}
 
+  // Payload size in bytes
+  uint32_t get_payload_size() const {return pkt_len - hdr_len;}
+  uint32_t get_seq_num() const {return seq_num;}
+  uint32_t get_ack_num() const {return seq_num;}
+
 private:
   const u_char* packet;
   size_t pkt_len, cap_len;

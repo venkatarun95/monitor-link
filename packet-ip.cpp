@@ -48,6 +48,8 @@ PacketIP::PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len)
   case 0x11: proto = UDP; break;
   default: proto = Unknown; break;
   }
+
+  // TODO(venkat): Deal with fragmentation
 }
 
 PacketTCP PacketIP::get_tcp() const {

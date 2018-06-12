@@ -62,7 +62,7 @@ int main() {
   print(seq);
   seq.set_block(100, 10, md2);
   print(seq);
-  
+
   // Join blocks
 
   return 0;

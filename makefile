@@ -6,7 +6,7 @@ INCLUDES :=	-I/opt/local/include/ -I radiotap-library
 
 LIBS     := -lpcap
 #$(MEMORY_STYLE)/libremyprotos.a
-OBJECTS  := packet-ethernet.o packet-ip.o packet-tcp.o sequence.o
+OBJECTS  := packet-ethernet.o packet-ip.o packet-tcp.o sequence.o tcp-connection.o
 
 all: monitor
 
