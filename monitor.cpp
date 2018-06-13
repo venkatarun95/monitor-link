@@ -1,3 +1,4 @@
+#include "analyze-tcp-streams.hpp"
 #include "packet-ethernet.hpp"
 #include "packet-ip.hpp"
 #include "packet-tcp.hpp"
@@ -12,12 +13,15 @@
 
 using namespace std;
 
+monitor::AnalyzeTCPStreams analyze_tcp;
+int link_type = -1;
+
 // Callback function
 void packet_handler(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet);
 
 void print_tcp_conns();
-void sig_ints_handler(int){print_tcp_conns();}
+void sig_ints_handler(int){analyze_tcp.print_conns(); exit(0);}
 
 int main(int argc, char *argv[])
 {
@@ -36,8 +40,30 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  if (pcap_datalink(handle) != DLT_EN10MB) {
-    cerr << "Device doesn't provide Ethernet headers. This is not supported" << endl;
+  // Determine the type of link-layer header
+  link_type = pcap_datalink(handle);
+  switch (link_type) {
+  case DLT_NULL:
+    cout << "Link-layer type: NULL e.g. used in BSD loopback" << endl;
+    break;
+  case DLT_RAW:
+    cout << "Link-layer type: Raw IP headers" << endl;
+    break;
+  case DLT_EN10MB:
+    cout << "Link-layer type: Ethernet" << endl;
+    break;
+  case DLT_LINUX_SLL:
+    cout << "Link-layer type: Linux \"cooked\" capture encapsulation" << endl;
+    cerr << "Error: Link-layer type not yet supported." << endl;
+    return -1;
+    break;
+  case DLT_IEEE802_11_RADIO:
+    cout << "Link-layer type: RadioTap header" << endl;
+    cerr << "Error: Link-layer type not yet supported." << endl;
+    return -1;
+    break;
+  default:
+    cerr << "Unsupported link-layer type '" << link_type << "'." << endl;
     return -1;
   }
 
@@ -71,26 +97,12 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-struct FiveTuple {
-  monitor::IPAddr src, dst;
-  uint16_t sport, dport;
-  // Always TCP, no need to store protocol
-
-  struct hash {
-    size_t operator()(const FiveTuple& x) const {
-      return x.src.hash() ^ x.dst.hash() ^
-        std::hash<uint32_t>()(x.sport * x.dport);
-    }
-  };
-
-  bool operator==(const FiveTuple& x) const {
-    return src == x.src &&
-      dst == x.dst &&
-      sport == x.sport && dport == x.dport;
-  }
+struct LinkLayer_LinuxSLL {
+  // Who sent packet to whom (us/somebody else/broadcast/multicast)
+  uint16_t packet_type;
+  uint16_t arphrd_type;
+  // ... header incomplete ...
 };
-
-unordered_map<FiveTuple, monitor::TCPConnection, FiveTuple::hash> tcp_conns;
 
 void packet_handler(u_char *args, const struct pcap_pkthdr *header,
                     const u_char *packet) {
@@ -99,41 +111,35 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header,
     (uint64_t)header->ts.tv_usec;
   double timestamp = ts * 1e-6;
 
-  monitor::PacketEthernet eth(packet, header->len, header->caplen);
-  if (!eth.is_ip())
-    return;
+  // Decode link layer to get IP packet
+  monitor::PacketIP ip;
+  switch (link_type) {
+  case DLT_EN10MB: {
+    monitor::PacketEthernet eth(packet, header->len, header->caplen);
+    if (!eth.is_ip())
+      return;
+    ip = eth.get_ip();
+    break;
+  }
+  case DLT_RAW:
+    ip = monitor::PacketIP(packet, header->len, header->caplen);
+    break;
+  case DLT_NULL: {
+    uint32_t pkt_type = *(uint32_t*) packet;
+    if (pkt_type == 2 || pkt_type == 24 || pkt_type == 28 || pkt_type == 30)
+      ip = monitor::PacketIP(packet + 4, header->len - 4, header->caplen - 4);
+    break;
+  }
+  case DLT_IEEE802_11_RADIO: {
+    
+  }
+  default:
+    assert(false); // Link type not handled
+  }
 
-  monitor::PacketIP ip = eth.get_ip();
-  if (!ip.is_tcp())
-    return;
-  // TODO(venkat): Handle fragmentation
+  analyze_tcp.new_pkt(timestamp, ip);
 
-  monitor::PacketTCP tcp = ip.get_tcp();
-
-  FiveTuple five_tuple = {ip.get_src_addr(), ip.get_dst_addr(),
-                          tcp.get_src_port(), tcp.get_dst_port()};
-  FiveTuple five_tuple_rev =  {ip.get_dst_addr(), ip.get_src_addr(),
-                               tcp.get_dst_port(), tcp.get_src_port()};
-
-  if (tcp_conns.find(five_tuple) == tcp_conns.end())
-    tcp_conns[five_tuple] = monitor::TCPConnection();
-  if (tcp_conns.find(five_tuple_rev) == tcp_conns.end())
-    tcp_conns[five_tuple_rev] = monitor::TCPConnection();
-
-  tcp_conns[five_tuple].new_pkt(timestamp, tcp, false);
-  tcp_conns[five_tuple_rev].new_pkt(timestamp, tcp, true);
-  args = nullptr;
+  args = nullptr; // To prevent 'attribute unused' warning
 }
 
-void print_tcp_conns() {
-  cout << "Printing " << endl;
-  for (const auto& x : tcp_conns) {
-    cout << x.first.src.str() << ":" << x.first.sport << "-"
-         << x.first.dst.str() << ":" << x.first.dport << " "
-         << x.second.get_avg_rtt() << " "
-         << x.second.get_rtt_var() << " "
-         << x.second.get_median_rtt() << " "
-         << x.second.get_avg_tpt() << endl;
-      }
-  exit(0);
-}
+

@@ -61,19 +61,13 @@ struct IPAddr {
     else
       return v6.s6_addr == x.v6.s6_addr;
   }
-
-  // struct hash {
-  //   size_t operator()(const monitor::IPAddr& x) const {
-  //     if (x.is_v4)
-  //       return std::hash<int64_t>()(*(int64_t*)&x.v4);
-  //     else
-  //       return std::hash<int64_t>()(*(int64_t*)&x.v6);
-  //   }
-  // };
 };
 
 class PacketIP {
 public:
+  // This constructor does very little. It exists for convenience only. Do not
+  // call any functions if constructed using this constructor
+  PacketIP();
   PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len);
 
   bool is_tcp() const {return proto == TCP;}
@@ -94,17 +88,5 @@ private:
 };
 
 } // namespace monitor
-
-// namespace std {
-//   template <>
-//   struct hash<monitor::IPAddr> {
-//     size_t operator()(const monitor::IPAddr& x) const {
-//       if (x.is_v4)
-//         return hash<int64_t>()(*(int64_t*)&x.v4);
-//       else
-//         return hash<int64_t>()(*(int64_t*)&x.v6);
-//     }
-//   };
-// } // namespace std
 
 #endif // #ifndef MONITOR_IP_HPP

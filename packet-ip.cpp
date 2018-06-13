@@ -7,6 +7,12 @@
 
 namespace monitor {
 
+PacketIP::PacketIP() :
+  packet(nullptr),
+  pkt_len(0),
+  cap_len(0)
+{}
+
 PacketIP::PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len)
   : packet(packet),
     pkt_len(pkt_len),
@@ -29,8 +35,9 @@ PacketIP::PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len)
   else
     assert(false); // Unrecognized IP version
 
+  // TODO(venkat): support IPv6
   if (version == IPv6) {
-    std::cerr << "IPV6 not yet supported" << std::endl;
+    std::cerr << "IPv6 not yet supported" << std::endl;
     exit(1);
   }
 
