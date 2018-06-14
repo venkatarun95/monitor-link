@@ -25,7 +25,7 @@ public:
   // Payload size in bytes
   uint32_t get_payload_size() const {return pkt_len - hdr_len;}
   uint32_t get_seq_num() const {return seq_num;}
-  uint32_t get_ack_num() const {return seq_num;}
+  uint32_t get_ack_num() const {return ack_num;}
 
 private:
   const u_char* packet;
