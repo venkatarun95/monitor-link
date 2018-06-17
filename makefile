@@ -1,7 +1,7 @@
 MEMORY_STYLE := ./protobufs-default
 
 CXX := g++
-CXXFLAGS := -std=c++11 -pthread -pedantic -Wall -Wextra -Werror -g -O2 -fPIC -Wno-unused-private-field
+CXXFLAGS := -std=c++11 -pthread -pedantic -Weffc++ -Wall -Wextra -Werror -g -O2 -fPIC -Wno-unused-private-field
 INCLUDES :=	-I/opt/local/include/  -I radiotap-library
 
 LIBS     := -lpcap 

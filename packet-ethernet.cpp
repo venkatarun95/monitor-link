@@ -11,7 +11,10 @@ PacketEthernet::PacketEthernet(const u_char* packet, size_t pkt_len,
                                size_t cap_len)
   : packet(packet),
     pkt_len(pkt_len),
-    cap_len(cap_len)
+    cap_len(cap_len),
+    shost(),
+    dhost(),
+    type()
 {
   assert(pkt_len >= cap_len);
   assert(cap_len >= sizeof(ether_header));

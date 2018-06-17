@@ -10,6 +10,9 @@ namespace monitor {
 
 class AnalyzeTCPStreams {
 public:
+  AnalyzeTCPStreams() :
+    tcp_conns()
+  {}
   void new_pkt(double timestamp, const PacketIP& ip);
   void print_conns() const;
 

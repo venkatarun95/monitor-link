@@ -9,7 +9,16 @@ namespace monitor {
 PacketTCP::PacketTCP(const u_char* packet, size_t pkt_len, size_t cap_len)
   : packet(packet),
     pkt_len(pkt_len),
-    cap_len(cap_len)
+    cap_len(cap_len),
+    src_port(0),
+    dst_port(0),
+    seq_num(0),
+    ack_num(0),
+    fl_fin(), fl_syn(), fl_rst(), fl_push(), fl_ack(), fl_urg(),
+#ifdef __APPLE__
+    fl_ece(0), fl_cwr(0),
+#endif
+    hdr_len(0)
 {
   assert(pkt_len >= cap_len);
   assert(cap_len >= 20);

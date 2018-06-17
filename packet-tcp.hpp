@@ -19,8 +19,10 @@ public:
   bool is_push() const {return fl_push;}
   bool is_ack() const {return fl_ack;}
   bool is_urg() const {return fl_urg;}
+#ifdef __APPLE__
   bool is_eve() const {return fl_ece;}
   bool is_cwr() const {return fl_cwr;}
+#endif
 
   // Payload size in bytes
   uint32_t get_payload_size() const {return pkt_len - hdr_len;}
@@ -34,7 +36,10 @@ private:
   uint16_t src_port, dst_port;
   uint32_t seq_num, ack_num;
   // Flags
-  bool fl_fin, fl_syn, fl_rst, fl_push, fl_ack, fl_urg, fl_ece, fl_cwr;
+  bool fl_fin, fl_syn, fl_rst, fl_push, fl_ack, fl_urg;
+#ifdef __APPLE__
+  bool fl_ece, fl_cwr;
+#endif
   size_t hdr_len;
 };
 

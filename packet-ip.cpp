@@ -10,13 +10,23 @@ namespace monitor {
 PacketIP::PacketIP() :
   packet(nullptr),
   pkt_len(0),
-  cap_len(0)
+  cap_len(0),
+  version(),
+  proto(),
+  src(),
+  dst(),
+  hdr_len(0)
 {}
 
 PacketIP::PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len)
   : packet(packet),
     pkt_len(pkt_len),
-    cap_len(cap_len)
+    cap_len(cap_len),
+    version(),
+    proto(),
+    src(),
+    dst(),
+    hdr_len(0)
 {
 #ifdef _IP_VHL
   // Version and leader length fields combined. Not yet supported.
