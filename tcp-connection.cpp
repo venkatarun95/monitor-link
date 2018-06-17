@@ -66,26 +66,41 @@ void TCPConnection::new_pkt(double timestamp, const PacketTCP& pkt, bool ack) {
       else
         break;
     }
-    last_acked_pkt = max(last_acked_pkt, pkt.get_ack_num());
+
+    // TODO(venkat): handle wraparound
+    double prev_last_acked_pkt = last_acked_pkt;
+    // Updated last acked packet, taking wraparound into account
+    if (pkt.get_ack_num() > last_acked_pkt ||
+        (last_acked_pkt >= numeric_limits<Seq>::max()/2 &&
+         last_acked_pkt - pkt.get_ack_num() >= numeric_limits<Seq>::max()/2))
+      last_acked_pkt = pkt.get_ack_num();
 
     const double timeout = 2.0;
     // No time interval currently active
     if (time_interval_start == 0.) {
       // Activate interval
+      cout << "Interval activated" << endl;
       time_interval_start = timestamp;
       interval_start_ack_num = last_acked_pkt;
       last_ack_time = timestamp;
       return;
     }
     // See if last time interval ended
-    else if (timestamp - last_ack_time > timeout)  {
-      // This was the last packet in time interval
-      double interval = timestamp - time_interval_start;
-      Seq num_bytes_in_interval = last_acked_pkt - interval_start_ack_num;
+    else if (timestamp - last_ack_time > timeout ||
+             last_acked_pkt - interval_start_ack_num >= numeric_limits<Seq>::max()/2) {
+      // This is the first packet in next interval
+      double interval = last_ack_time - time_interval_start;
+      Seq num_bytes_in_interval = prev_last_acked_pkt - interval_start_ack_num;
+      cout << "Interval ended " << num_bytes_in_interval << " " << interval << endl;
       if (num_bytes_in_interval > 0 && interval > 0)
         avg_throughput(num_bytes_in_interval / interval,
                        boost::accumulators::weight=interval);
-      time_interval_start = 0;
+      if (pkt.get_ack_num() > last_acked_pkt) {
+        time_interval_start = timestamp;
+        interval_start_ack_num = last_acked_pkt;
+      }
+      else
+        time_interval_start = 0;
     }
 
     last_ack_time = timestamp;
@@ -94,11 +109,10 @@ void TCPConnection::new_pkt(double timestamp, const PacketTCP& pkt, bool ack) {
 
 double TCPConnection::get_avg_tpt() const {
   using namespace boost::accumulators;
-  cout << last_acked_pkt << endl;
+  cout << interval_start_ack_num << " " << last_acked_pkt << " " << weighted_sum(avg_throughput) << " " << sum_of_weights(avg_throughput) << " " << last_ack_time - time_interval_start << endl;
   Seq num_bytes_in_interval = last_acked_pkt - interval_start_ack_num;
-  return (weighted_mean(avg_throughput) * sum_of_weights(avg_throughput) +
-          num_bytes_in_interval) / (sum_of_weights(avg_throughput) +
-                                    last_ack_time - time_interval_start);
+  return 8 * (weighted_sum(avg_throughput) + num_bytes_in_interval) /
+    (sum_of_weights(avg_throughput) + last_ack_time - time_interval_start);
 }
 
 }

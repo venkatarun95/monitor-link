@@ -104,7 +104,8 @@ struct LinkLayer_LinuxSLL {
   // ... header incomplete ...
 };
 
-void packet_handler(u_char *args, const struct pcap_pkthdr *header,
+void packet_handler(u_char *args __attribute__((unused)),
+                    const struct pcap_pkthdr *header,
                     const u_char *packet) {
   // Timestamp   in microseconds
   uint64_t ts = (uint64_t)header->ts.tv_sec * 1000000 +
@@ -138,8 +139,6 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header,
   }
 
   analyze_tcp.new_pkt(timestamp, ip);
-
-  args = args; // To prevent 'attribute unused' warning
 }
 
 
