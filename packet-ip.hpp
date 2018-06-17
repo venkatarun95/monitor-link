@@ -33,12 +33,12 @@ struct IPAddr {
     if (is_v4) {
       char buf[INET_ADDRSTRLEN];
       inet_ntop(AF_INET, &v4, buf, INET_ADDRSTRLEN);
-      return std::string(buf, INET_ADDRSTRLEN);
+      return std::string(buf);
     }
     else {
       char buf[INET6_ADDRSTRLEN];
       inet_ntop(AF_INET6, &v6, buf, INET6_ADDRSTRLEN);
-      return std::string(buf, INET6_ADDRSTRLEN);
+      return std::string(buf);
     }
   }
 

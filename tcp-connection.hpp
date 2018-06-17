@@ -26,6 +26,9 @@ public:
   double get_avg_rtt() const {return boost::accumulators::mean(rtt);}
   double get_rtt_var() const {return boost::accumulators::variance(rtt);}
   double get_median_rtt() const {return boost::accumulators::median(rtt);}
+  uint64_t get_num_rtt_samples() const {return boost::accumulators::count(rtt);}
+  uint64_t get_tot_num_pkts() const {return tot_num_pkts;}
+  uint64_t get_num_rtx() const {return num_rtx;}
   double get_avg_tpt() const;
 
 private:
@@ -52,10 +55,17 @@ private:
   // interval is a contiguous period of time when there were always packets in
   // flight
   double time_interval_start;
-  int64_t num_bytes_in_interval;
+  // Last acknowledged packet at the start of interval
+  Seq interval_start_ack_num;
+  // Last acknowledged packet
+  Seq last_acked_pkt;
 
   // Last time we got an ACK
   double last_ack_time;
+  // Total number of packets
+  int64_t tot_num_pkts;
+  // Number of retransmissions
+  int64_t num_rtx;
 };
 
 } // namespace monitor

@@ -18,8 +18,8 @@ PacketTCP::PacketTCP(const u_char* packet, size_t pkt_len, size_t cap_len)
   src_port = ntohs(tcp->th_sport);
   dst_port = ntohs(tcp->th_dport);
 
-  seq_num = ntohs(tcp->th_seq);
-  ack_num = ntohs(tcp->th_ack);
+  seq_num = ntohl(tcp->th_seq);
+  ack_num = ntohl(tcp->th_ack);
 
   // Read flags
   fl_fin = tcp->th_flags & TH_FIN;
