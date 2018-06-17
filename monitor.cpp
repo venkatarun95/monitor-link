@@ -4,7 +4,7 @@
 #include "packet-tcp.hpp"
 #include "tcp-connection.hpp"
 
-#include <cstdlib>
+#include <csignal>
 #include <iostream>
 #include <pcap.h>
 #include <unordered_map>
@@ -139,7 +139,7 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header,
 
   analyze_tcp.new_pkt(timestamp, ip);
 
-  args = nullptr; // To prevent 'attribute unused' warning
+  args = args; // To prevent 'attribute unused' warning
 }
 
 

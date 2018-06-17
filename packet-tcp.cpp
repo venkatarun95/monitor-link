@@ -28,8 +28,11 @@ PacketTCP::PacketTCP(const u_char* packet, size_t pkt_len, size_t cap_len)
   fl_push = tcp->th_flags & TH_PUSH;
   fl_ack = tcp->th_flags & TH_ACK;
   fl_urg = tcp->th_flags & TH_URG;
+#ifdef __APPLE__
+  // For some reason linux does not define these flags
   fl_ece = tcp->th_flags & TH_ECE;
   fl_cwr = tcp->th_flags & TH_CWR;
+#endif
 
   size_t offset = tcp->th_off;
   if (offset > 5) {
