@@ -38,18 +38,18 @@ void TCPConnection::new_pkt(double timestamp, const PacketTCP& pkt, bool ack) {
   if (!ack) {
     bool is_retransmission = false;
     // Check if it is a retransmission
-    // if (!pkts.empty() &&
-    //     pkt.get_seq_num() < pkts.back().start + pkts.back().len) {
-    //   // Mark that packet as a retransmission
-    //   for (auto& x : pkts) {
-    //     if (overlaps(x.start, x.len, pkt.get_seq_num(), pkt.get_payload_size())) {
-    //       x.status = MetaData::Rtxd;
-    //       is_retransmission = true;
-    //     }
-    //     if (x.start + x.len < pkt.get_seq_num())
-    //       break;
-    //   }
-    // }
+    if (!pkts.empty() &&
+        pkt.get_seq_num() < pkts.back().start + pkts.back().len) {
+      // Mark that packet as a retransmission
+      for (auto& x : pkts) {
+        if (overlaps(x.start, x.len, pkt.get_seq_num(), pkt.get_payload_size())) {
+          x.status = MetaData::Rtxd;
+          is_retransmission = true;
+        }
+        if (x.start + x.len < pkt.get_seq_num())
+          break;
+      }
+    }
     if (!is_retransmission) {
       pkts.push_back(MetaData {
           pkt.get_seq_num(),

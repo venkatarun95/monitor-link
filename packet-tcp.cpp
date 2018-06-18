@@ -49,6 +49,8 @@ PacketTCP::PacketTCP(const u_char* packet, size_t pkt_len, size_t cap_len)
     assert(cap_len >= offset * 4);
     // We don't parse options yet
   }
+
+  hdr_len = offset * 4;
 }
 
 } // namespace monitor
