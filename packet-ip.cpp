@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <netinet/ip.h>
+#include <netinet/ip6.h>
 
 namespace monitor {
 
@@ -45,22 +46,33 @@ PacketIP::PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len)
   else
     assert(false); // Unrecognized IP version
 
-  // TODO(venkat): support IPv6
+  uint8_t transport_type;
+
   if (version == IPv6) {
-    std::cerr << "IPv6 not yet supported" << std::endl;
-    exit(1);
+    ip6_hdr* ip6 = (ip6_hdr*) packet;
+    transport_type = ip6->ip6_ctlun.ip6_un1.ip6_un1_nxt;
+    src = ip6->ip6_src;
+    dst = ip6->ip6_dst;
+    if (ip6->ip6_ctlun.ip6_un1.ip6_un1_plen == 0) {
+      std::cerr << "Jumbo payload not yet supported!" << std::endl;
+      exit(1);
+    }
+    hdr_len = pkt_len - ntohs(ip6->ip6_ctlun.ip6_un1.ip6_un1_plen);
+  }
+  else {
+    // Check that our capture length is bigger than address
+    hdr_len = ip_hdr->ip_hl * 4;
+    assert(cap_len > hdr_len);
+    
+    // Get src and dst address
+    src = ip_hdr->ip_src;
+    dst = ip_hdr->ip_dst;
+
+    transport_type = ip_hdr->ip_p;
   }
 
-  // Check that our capture length is bigger than address
-  hdr_len = ip_hdr->ip_hl * 4;
-  assert(cap_len > hdr_len);
-
-  // Get src and dst address
-  src = ip_hdr->ip_src;
-  dst = ip_hdr->ip_dst;
-
   // Type of transport layer
-  switch(ip_hdr->ip_p) {
+  switch(transport_type) {
   case 0x06: proto = TCP; break;
   case 0x11: proto = UDP; break;
   default: proto = Unknown; break;

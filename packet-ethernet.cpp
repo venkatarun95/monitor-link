@@ -31,7 +31,7 @@ PacketIP PacketEthernet::get_ip() const {
 }
 
 bool PacketEthernet::is_ip() const {
-  return ntohs(type) == ETHERTYPE_IP;
+  return ntohs(type) == ETHERTYPE_IP || ntohs(type) == ETHERTYPE_IPV6;
 }
 
 bool PacketEthernet::is_arp() const {

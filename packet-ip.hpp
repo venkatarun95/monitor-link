@@ -1,11 +1,13 @@
 #ifndef MONITOR_IP_HPP
 #define MONITOR_IP_HPP
 
+#include "packet-tcp.hpp"
+
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <string>
 
-#include "packet-tcp.hpp"
+#include <cstring>
+#include <string>
 
 namespace monitor {
 
@@ -47,8 +49,8 @@ struct IPAddr {
       return std::hash<uint32_t>()(v4.s_addr); //std::hash<int32_t>()(*(int32_t*)&v4);
     else {
       uint64_t x = 0;
-      for (int i = 0; i < 4; ++i)
-        x += v6.s6_addr[i];
+      for (int i = 0; i < 16; ++i)
+        x += (v6.s6_addr[i] << (4 * i));
       return std::hash<uint32_t>()(x);
     }
   }
@@ -57,9 +59,12 @@ struct IPAddr {
     if (is_v4 != x.is_v4)
       return false;
     if (is_v4)
+      // Warning: Only works if they are int types. For 32-bit systems and
+      // above, this should be true for IPv4. Otherwise use memcmp as in IPv6
       return v4.s_addr == x.v4.s_addr;
-    else
-      return v6.s6_addr == x.v6.s6_addr;
+    else {
+      return memcmp(v6.s6_addr, x.v6.s6_addr, 16) == 0;
+    }
   }
 };
 
