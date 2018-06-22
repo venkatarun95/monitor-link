@@ -4,6 +4,7 @@
 #include "packet-ip.hpp"
 #include "tcp-connection.hpp"
 
+#include <fstream>
 #include <unordered_map>
 
 namespace monitor {
@@ -14,7 +15,7 @@ public:
     tcp_conns()
   {}
   void new_pkt(double timestamp, const PacketIP& ip);
-  void print_conns() const;
+  void print_conns(std::ostream&) const;
 
 private:
   struct FiveTuple {

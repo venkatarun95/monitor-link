@@ -85,7 +85,6 @@ void TCPConnection::new_pkt(double timestamp, const PacketTCP& pkt, bool ack) {
     // No time interval currently active
     if (time_interval_start == 0.) {
       // Activate interval
-      cout << "Interval activated" << endl;
       time_interval_start = timestamp;
       interval_start_ack_num = last_acked_pkt;
       last_ack_time = timestamp;
@@ -97,7 +96,6 @@ void TCPConnection::new_pkt(double timestamp, const PacketTCP& pkt, bool ack) {
       // This is the first packet in next interval
       double interval = last_ack_time - time_interval_start;
       Seq num_bytes_in_interval = prev_last_acked_pkt - interval_start_ack_num;
-      cout << "Interval ended " << num_bytes_in_interval << " " << interval << endl;
       if (num_bytes_in_interval > 0 && interval > 0)
         avg_throughput(num_bytes_in_interval / interval,
                        boost::accumulators::weight=interval);

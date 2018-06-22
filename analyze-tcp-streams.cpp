@@ -30,18 +30,18 @@ void AnalyzeTCPStreams::new_pkt(double timestamp, const PacketIP& ip) {
   tcp_conns[five_tuple_rev].new_pkt(timestamp, tcp, true);
 }
 
-void AnalyzeTCPStreams::print_conns() const {
-  cout << "Printing " << endl;
+void AnalyzeTCPStreams::print_conns(ostream& stream) const {
+  stream << "Printing " << endl;
   for (const auto& x : tcp_conns) {
-    cout << x.first.src.str() << ":" << x.first.sport << "-"
-         << x.first.dst.str() << ":" << x.first.dport << " "
-         << "AvgRTT "<< x.second.get_avg_rtt() << " "
-         << "RTTVar " << x.second.get_rtt_var() << " "
-         << "MedRTT " << x.second.get_median_rtt() << " "
-         << "AvgTpt " << x.second.get_avg_tpt() << " "
-         << "NumRtx " << x.second.get_num_rtx() << " "
-         << "CntRTT " << x.second.get_num_rtt_samples() << " "
-         << "NumPkt " << x.second.get_tot_num_pkts() << endl;
+    stream << x.first.src.str() << ":" << x.first.sport << "-"
+           << x.first.dst.str() << ":" << x.first.dport << " "
+           << "AvgRTT "<< x.second.get_avg_rtt() << " "
+           << "RTTVar " << x.second.get_rtt_var() << " "
+           << "MedRTT " << x.second.get_median_rtt() << " "
+           << "AvgTpt " << x.second.get_avg_tpt() << " "
+           << "NumRtx " << x.second.get_num_rtx() << " "
+           << "CntRTT " << x.second.get_num_rtt_samples() << " "
+           << "NumPkt " << x.second.get_tot_num_pkts() << endl;
   }
 }
 

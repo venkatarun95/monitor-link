@@ -21,7 +21,10 @@ void packet_handler(u_char *args, const struct pcap_pkthdr *header,
                 const u_char *packet);
 
 void print_tcp_conns();
-void sig_ints_handler(int){analyze_tcp.print_conns(); exit(0);}
+void sig_ints_handler(int) {
+  analyze_tcp.print_conns(cout);
+  exit(0);
+}
 
 int main(int argc, char *argv[])
 {
@@ -104,6 +107,7 @@ struct LinkLayer_LinuxSLL {
   // ... header incomplete ...
 };
 
+uint64_t last_dump_time = 0;
 void packet_handler(u_char *args __attribute__((unused)),
                     const struct pcap_pkthdr *header,
                     const u_char *packet) {
@@ -139,6 +143,14 @@ void packet_handler(u_char *args __attribute__((unused)),
   }
 
   analyze_tcp.new_pkt(timestamp, ip);
+
+  if (header->ts.tv_sec - last_dump_time > 60) {
+    ofstream ofile(string("dump-") + to_string(header->ts.tv_sec)
+                   + string(".txt"));
+    analyze_tcp.print_conns(ofile);
+    ofile.close();
+    last_dump_time = header->ts.tv_sec;
+  }
 }
 
 
