@@ -16,7 +16,8 @@ PacketIP::PacketIP() :
   proto(),
   src(),
   dst(),
-  hdr_len(0)
+  hdr_len(0),
+  frag_off(0)
 {}
 
 PacketIP::PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len)
@@ -27,7 +28,8 @@ PacketIP::PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len)
     proto(),
     src(),
     dst(),
-    hdr_len(0)
+    hdr_len(0),
+    frag_off(0)
 {
 #ifdef _IP_VHL
   // Version and leader length fields combined. Not yet supported.
