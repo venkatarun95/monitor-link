@@ -78,6 +78,7 @@ public:
   bool is_tcp() const {return proto == TCP;}
   bool is_udp() const {return proto == UDP;}
   bool is_v4() const {return version == IPv4;}
+  uint16_t get_frag_off() const {return frag_off;}
   IPAddr get_src_addr() const {return src;}
   IPAddr get_dst_addr() const {return dst;}
 
@@ -90,6 +91,7 @@ private:
   enum PROTO {TCP, UDP, Unknown} proto;
   IPAddr src, dst;
   size_t hdr_len;
+  uint16_t frag_off;
 };
 
 } // namespace monitor

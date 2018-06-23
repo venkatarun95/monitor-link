@@ -69,6 +69,7 @@ PacketIP::PacketIP(const u_char* packet, size_t pkt_len, size_t cap_len)
     dst = ip_hdr->ip_dst;
 
     transport_type = ip_hdr->ip_p;
+    frag_off = ntohs(ip_hdr->ip_off) & 0x1fff;
   }
 
   // Type of transport layer

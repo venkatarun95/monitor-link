@@ -10,9 +10,15 @@ using namespace std;
 namespace monitor {
 
 void AnalyzeTCPStreams::new_pkt(double timestamp, const PacketIP& ip) {
-  if (!ip.is_tcp())
+  if (!ip.is_tcp()) {
+    ++ num_non_tcp_pkts;
     return;
-  // TODO(venkat): Handle fragmentation
+  }
+  if (ip.get_frag_off() != 0) {
+    ++ num_frag_pkts;
+    return;
+  }
+  ++ tot_pkts;
 
   PacketTCP tcp = ip.get_tcp();
 
@@ -32,6 +38,9 @@ void AnalyzeTCPStreams::new_pkt(double timestamp, const PacketIP& ip) {
 
 void AnalyzeTCPStreams::print_conns(ostream& stream) const {
   stream << "Printing " << endl;
+  stream << "TotPkts " << tot_pkts << " "
+         << "NonTcpPkts " << num_non_tcp_pkts << " "
+         << "FragPkts " << num_frag_pkts << endl;
   for (const auto& x : tcp_conns) {
     stream << x.first.src.str() << ":" << x.first.sport << "-"
            << x.first.dst.str() << ":" << x.first.dport << " "

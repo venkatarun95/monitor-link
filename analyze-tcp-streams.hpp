@@ -37,6 +37,10 @@ private:
     }
   };
 
+  uint64_t tot_pkts;
+  uint64_t num_non_tcp_pkts;
+  uint64_t num_frag_pkts;
+
   std::unordered_map<FiveTuple, monitor::TCPConnection, FiveTuple::hash> tcp_conns;
 };
 
