@@ -81,6 +81,7 @@ public:
   uint16_t get_frag_off() const {return frag_off;}
   IPAddr get_src_addr() const {return src;}
   IPAddr get_dst_addr() const {return dst;}
+  uint32_t get_cap_len() const {return cap_len;}
 
   PacketTCP get_tcp() const;
 

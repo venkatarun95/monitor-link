@@ -12,7 +12,11 @@ namespace monitor {
 class AnalyzeTCPStreams {
 public:
   AnalyzeTCPStreams() :
-    tcp_conns()
+    tcp_conns(),
+    tot_pkts(0),
+    num_non_tcp_pkts(0),
+    num_frag_pkts(0),
+    num_small_pkts(0)
   {}
   void new_pkt(double timestamp, const PacketIP& ip);
   void print_conns(std::ostream&) const;
@@ -37,11 +41,12 @@ private:
     }
   };
 
+  std::unordered_map<FiveTuple, monitor::TCPConnection, FiveTuple::hash> tcp_conns;
+  
   uint64_t tot_pkts;
   uint64_t num_non_tcp_pkts;
   uint64_t num_frag_pkts;
-
-  std::unordered_map<FiveTuple, monitor::TCPConnection, FiveTuple::hash> tcp_conns;
+  uint64_t num_small_pkts;
 };
 
 } // namespace monitor

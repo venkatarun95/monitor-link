@@ -18,6 +18,10 @@ void AnalyzeTCPStreams::new_pkt(double timestamp, const PacketIP& ip) {
     ++ num_frag_pkts;
     return;
   }
+  if ((ip.is_v4() && ip.get_cap_len() < 40) ||
+      (!ip.is_v4() && ip.get_cap_len() < 60)) {
+    ++ num_small_pkts;
+  }
   ++ tot_pkts;
 
   PacketTCP tcp = ip.get_tcp();
@@ -40,7 +44,8 @@ void AnalyzeTCPStreams::print_conns(ostream& stream) const {
   stream << "Printing " << endl;
   stream << "TotPkts " << tot_pkts << " "
          << "NonTcpPkts " << num_non_tcp_pkts << " "
-         << "FragPkts " << num_frag_pkts << endl;
+         << "FragPkts " << num_frag_pkts << " "
+         << "SmallPkts" << num_small_pkts << endl;
   for (const auto& x : tcp_conns) {
     stream << x.first.src.str() << ":" << x.first.sport << "-"
            << x.first.dst.str() << ":" << x.first.dport << " "
