@@ -18,7 +18,8 @@ public:
     num_frag_pkts(0),
     num_small_pkts(0)
   {}
-  void new_pkt(double timestamp, const PacketIP& ip);
+  // Timestamp in microseconds
+  void new_pkt(uint64_t timestamp, const PacketIP& ip);
   void print_conns(std::ostream&) const;
 
 private:
@@ -42,7 +43,8 @@ private:
   };
 
   std::unordered_map<FiveTuple, monitor::TCPConnection, FiveTuple::hash> tcp_conns;
-  
+
+  uint64_t start_time;
   uint64_t tot_pkts;
   uint64_t num_non_tcp_pkts;
   uint64_t num_frag_pkts;
