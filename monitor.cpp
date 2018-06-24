@@ -114,7 +114,6 @@ void packet_handler(u_char *args __attribute__((unused)),
   // Timestamp   in microseconds
   uint64_t ts = (uint64_t)header->ts.tv_sec * 1000000 +
     (uint64_t)header->ts.tv_usec;
-  double timestamp = ts * 1e-6;
 
   // Decode link layer to get IP packet
   monitor::PacketIP ip;
@@ -142,7 +141,7 @@ void packet_handler(u_char *args __attribute__((unused)),
     assert(false); // Link type not handled
   }
 
-  analyze_tcp.new_pkt(timestamp, ip);
+  analyze_tcp.new_pkt(ts, ip);
 
   if (header->ts.tv_sec - last_dump_time > 60) {
     ofstream ofile(string("dump-") + to_string(header->ts.tv_sec)

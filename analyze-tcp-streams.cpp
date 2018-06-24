@@ -9,7 +9,7 @@ using namespace std;
 
 namespace monitor {
 
-void AnalyzeTCPStreams::new_pkt(double timestamp, const PacketIP& ip) {
+void AnalyzeTCPStreams::new_pkt(uint64_t timestamp, const PacketIP& ip) {
   if (!ip.is_tcp()) {
     ++ num_non_tcp_pkts;
     return;
@@ -55,7 +55,11 @@ void AnalyzeTCPStreams::print_conns(ostream& stream) const {
            << "AvgTpt " << x.second.get_avg_tpt() << " "
            << "NumRtx " << x.second.get_num_rtx() << " "
            << "CntRTT " << x.second.get_num_rtt_samples() << " "
-           << "NumPkt " << x.second.get_tot_num_pkts() << endl;
+           << "NumPkt " << x.second.get_tot_num_pkts() << " "
+           << "StartT " << x.second.get_conn_start_time() <<  " "
+           << "LstAkT " << x.second.get_last_ack_time() << " "
+           << "AvgInt " << x.second.get_avg_interval_size() << " "
+           << "NumInt " << x.second.get_num_intervals() << endl;
   }
 }
 

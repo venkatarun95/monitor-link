@@ -12,6 +12,7 @@ TCPConnection::TCPConnection() :
   rtt(),
   avg_throughput(),
   time_interval_start(0.),
+  conn_start_time(0),
   interval_start_ack_num(0),
   last_acked_pkt(0),
   last_ack_time(0.),
@@ -33,8 +34,11 @@ bool TCPConnection::overlaps(Seq start1, Seq len1, Seq start2, Seq len2) const {
   }
 }
 
-void TCPConnection::new_pkt(double timestamp, const PacketTCP& pkt, bool ack) {
+void TCPConnection::new_pkt(uint64_t timestamp, const PacketTCP& pkt, bool ack) {
   ++ tot_num_pkts;
+  if (conn_start_time == 0)
+    conn_start_time = timestamp;
+
   if (!ack) {
     bool is_retransmission = false;
     // Check if it is a retransmission
@@ -81,7 +85,7 @@ void TCPConnection::new_pkt(double timestamp, const PacketTCP& pkt, bool ack) {
          last_acked_pkt - pkt.get_ack_num() >= numeric_limits<Seq>::max()/2))
       last_acked_pkt = pkt.get_ack_num();
 
-    const double timeout = 2.0;
+    const uint64_t timeout = 2000000;
     // No time interval currently active
     if (time_interval_start == 0.) {
       // Activate interval
@@ -94,11 +98,12 @@ void TCPConnection::new_pkt(double timestamp, const PacketTCP& pkt, bool ack) {
     else if (timestamp - last_ack_time > timeout ||
              last_acked_pkt - interval_start_ack_num >= numeric_limits<Seq>::max()/2) {
       // This is the first packet in next interval
-      double interval = last_ack_time - time_interval_start;
+      uint64_t interval = last_ack_time - time_interval_start;
       Seq num_bytes_in_interval = prev_last_acked_pkt - interval_start_ack_num;
-      if (num_bytes_in_interval > 0 && interval > 0)
-        avg_throughput(num_bytes_in_interval / interval,
-                       boost::accumulators::weight=interval);
+      if (num_bytes_in_interval > 0 && interval > 0) {
+        avg_throughput(1.0 * num_bytes_in_interval / interval,
+                       boost::accumulators::weight=1e-6*interval);
+      }
       if (pkt.get_ack_num() > last_acked_pkt) {
         time_interval_start = timestamp;
         interval_start_ack_num = last_acked_pkt;
@@ -114,8 +119,24 @@ void TCPConnection::new_pkt(double timestamp, const PacketTCP& pkt, bool ack) {
 double TCPConnection::get_avg_tpt() const {
   using namespace boost::accumulators;
   Seq num_bytes_in_interval = last_acked_pkt - interval_start_ack_num;
+  double time_in_interval = 0.;
+  if (time_interval_start != 0)
+    time_in_interval = 1e-6 * (last_ack_time - time_interval_start);
   return 8 * (weighted_sum(avg_throughput) + num_bytes_in_interval) /
-    (sum_of_weights(avg_throughput) + last_ack_time - time_interval_start);
+    (sum_of_weights(avg_throughput) + time_in_interval);
+}
+
+double TCPConnection::get_avg_interval_size() const {
+  using namespace boost::accumulators;
+  int interval_on = (time_interval_start != 0)?1:0;
+  return (sum_of_weights(avg_throughput) +
+          1e-6 * (last_ack_time - time_interval_start)) /
+    (boost::accumulators::count(avg_throughput) + interval_on);
+}
+
+uint64_t TCPConnection::get_num_intervals() const {
+  return boost::accumulators::count(avg_throughput) +
+    ((time_interval_start != 0)?1:0);
 }
 
 }
