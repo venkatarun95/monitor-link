@@ -118,10 +118,12 @@ void TCPConnection::new_pkt(uint64_t timestamp, const PacketTCP& pkt, bool ack) 
 
 double TCPConnection::get_avg_tpt() const {
   using namespace boost::accumulators;
-  Seq num_bytes_in_interval = last_acked_pkt - interval_start_ack_num;
+  Seq num_bytes_in_interval = 0;
   double time_in_interval = 0.;
-  if (time_interval_start != 0)
+  if (time_interval_start != 0) {
     time_in_interval = 1e-6 * (last_ack_time - time_interval_start);
+    num_bytes_in_interval = last_acked_pkt - interval_start_ack_num;
+  }
   return 8 * (weighted_sum(avg_throughput) + num_bytes_in_interval) /
     (sum_of_weights(avg_throughput) + time_in_interval);
 }
@@ -137,6 +139,14 @@ double TCPConnection::get_avg_interval_size() const {
 uint64_t TCPConnection::get_num_intervals() const {
   return boost::accumulators::count(avg_throughput) +
     ((time_interval_start != 0)?1:0);
+}
+
+uint64_t TCPConnection::get_num_bytes() const {
+  using namespace boost::accumulators;
+  if (time_interval_start != 0)
+    return weighted_sum(avg_throughput) + (last_acked_pkt - interval_start_ack_num);
+  else
+    return weighted_sum(avg_throughput);
 }
 
 }

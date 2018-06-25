@@ -33,6 +33,7 @@ public:
   uint64_t get_last_ack_time() const {return last_ack_time;}
   uint64_t get_num_intervals() const;
   double get_avg_interval_size() const;
+  uint64_t get_num_bytes() const;
   double get_avg_tpt() const;
 
 private:

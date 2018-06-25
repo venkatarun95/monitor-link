@@ -56,6 +56,7 @@ void AnalyzeTCPStreams::print_conns(ostream& stream) const {
            << "NumRtx " << x.second.get_num_rtx() << " "
            << "CntRTT " << x.second.get_num_rtt_samples() << " "
            << "NumPkt " << x.second.get_tot_num_pkts() << " "
+           << "NumByt " << x.second.get_num_bytes() << " "
            << "StartT " << x.second.get_conn_start_time() <<  " "
            << "LstAkT " << x.second.get_last_ack_time() << " "
            << "AvgInt " << x.second.get_avg_interval_size() << " "
