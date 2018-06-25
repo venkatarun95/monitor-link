@@ -28,6 +28,7 @@ public:
   uint64_t get_median_rtt() const {return boost::accumulators::median(rtt);}
   uint64_t get_num_rtt_samples() const {return boost::accumulators::count(rtt);}
   uint64_t get_tot_num_pkts() const {return tot_num_pkts;}
+  uint64_t get_tot_num_acks() const {return tot_num_acks;}
   uint64_t get_num_rtx() const {return num_rtx;}
   uint64_t get_conn_start_time() const {return conn_start_time;}
   uint64_t get_last_ack_time() const {return last_ack_time;}
@@ -72,6 +73,8 @@ private:
   uint64_t last_ack_time;
   // Total number of packets
   int64_t tot_num_pkts;
+  // Number of packets for which 'ack' was true
+  int64_t tot_num_acks;
   // Number of retransmissions
   int64_t num_rtx;
 };

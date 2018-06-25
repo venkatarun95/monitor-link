@@ -17,6 +17,7 @@ TCPConnection::TCPConnection() :
   last_acked_pkt(0),
   last_ack_time(0.),
   tot_num_pkts(0),
+  tot_num_acks(0),
   num_rtx(0)
 {}
 
@@ -66,6 +67,7 @@ void TCPConnection::new_pkt(uint64_t timestamp, const PacketTCP& pkt, bool ack) 
       ++ num_rtx;
   }
   else {
+    ++ tot_num_acks;
     // Pop acked packets and compute RTT
     while (!pkts.empty()) {
       if (pkts.front().start + pkts.front().len == pkt.get_ack_num())
